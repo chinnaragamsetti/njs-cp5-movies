@@ -40,6 +40,18 @@ app.get("/movies/", async (request, response) => {
   );
 });
 
+app.post("/movies/", async (request, response) => {
+  const { directorId, movieName, leadActor } = request.body;
+  const postMovieQuery = `
+  INSERT INTO
+    movie ( director_id, movie_name, lead_actor)
+  VALUES
+    (${directorId}, '${movieName}', '${leadActor}');`;
+  const movie = await database.run(postMovieQuery);
+
+  response.send("Movie Successfully Added");
+});
+
 app.get("/movies/:movieId/", async (request, response) => {
   const { movieId } = request.params;
   const getMovieQuery = `
@@ -49,19 +61,13 @@ app.get("/movies/:movieId/", async (request, response) => {
       movie 
     WHERE 
       movie_id = ${movieId};`;
-  const movie = await database.get(getMovieQuery);
-  response.send(movie);
-});
-
-app.post("/movies/", async (request, response) => {
-  const { directorId, movieName, leadActor } = request.body;
-  const postMovieQuery = `
-  INSERT INTO
-    movie ( director_id, movie_name, lead_actor)
-  VALUES
-    (${directorId}, '${movieName}', '${leadActor}');`;
-  const movie = await database.run(postMovieQuery);
-  response.send("Movie Successfully Added");
+  const eachMovie = await database.get(getMovieQuery);
+  response.send({
+    movieId: eachMovie.movie_id,
+    directorId: eachMovie.director_id,
+    movieName: eachMovie.movie_name,
+    leadActor: eachMovie.lead_actor,
+  });
 });
 
 app.put("/movies/:movieId/", async (request, response) => {
